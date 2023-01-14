@@ -36,11 +36,6 @@ def category() -> JsonType:
     return {"data": ["all category"]}
 
 
-@app.get("/blog/{id}")
-def show(id: int) -> OkResponseType:
-    return {"data": id}
-
-
 @app.get("/blog/{id}/comments")
 def comments(id: int, limit: Optional[str] = None) -> OkResponseType:
     return {"data": [id, limit, "comments"]}
@@ -59,3 +54,9 @@ def create_blog(blog: Blog, db: Session = Depends(get_db)) -> OkResponseType:
 def all_fetch(db: Session = Depends(get_db)) -> OkResponseType:
     blogs = db.query(models.Blog).all()
     return {"data": blogs}
+
+
+@app.get("/blog/{id}")
+def show(id: int, db: Session = Depends(get_db)) -> OkResponseType:
+    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
+    return {"data": blog}
