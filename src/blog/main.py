@@ -2,8 +2,12 @@ from fastapi import FastAPI
 from typing import Optional
 from .schemas import Blog
 from .types import JsonType, OkResponseType
+from .models import Base
+from .database import engine
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
