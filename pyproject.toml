@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "blog"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [
+  { include = "blog", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+logging = "^0.4.9.6"
+fastapi = "^0.88.0"
+uvicorn = "^0.20.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+flake8 = "^6.0.0"
+pytest = "^7.2.0"
+tox = "^3.27.1"
+isort = "^5.11.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+target-version = ['py311']
+line-length = 79
+
+[tool.isort]
+profile = "black"
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
+import_heading_stdlib = "Standard Library"
+import_heading_thirdparty = "Third Party Library"
+import_heading_firstparty = "First Party Library"
+import_heading_localfolder = "Local Library"

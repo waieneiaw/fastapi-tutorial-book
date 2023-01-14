@@ -1,0 +1,10 @@
+{
+	"[python]": {
+		"editor.wordBasedSuggestions": false
+	},
+	"python.analysis.typeCheckingMode": "basic",
+	"python.analysis.extraPaths": [
+		"./.venv/lib/python3.11/site-packages/",
+		"./src"
+	],
+}
