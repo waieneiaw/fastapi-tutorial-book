@@ -36,14 +36,6 @@ def category() -> JsonType:
     return {"data": ["all category"]}
 
 
-@app.get("/blog")
-def item(limit: int = 10, published: bool = True) -> OkResponseType:
-    if published:
-        return {"data": f"{limit}件"}
-    else:
-        return {"data": "非公開"}
-
-
 @app.get("/blog/{id}")
 def show(id: int) -> OkResponseType:
     return {"data": id}
@@ -61,3 +53,9 @@ def create_blog(blog: Blog, db: Session = Depends(get_db)) -> OkResponseType:
     db.commit()
     db.refresh(new_blog)
     return {"data": new_blog}
+
+
+@app.get("/blog")
+def all_fetch(db: Session = Depends(get_db)) -> OkResponseType:
+    blogs = db.query(models.Blog).all()
+    return {"data": blogs}
