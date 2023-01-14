@@ -1,13 +1,24 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from typing import Optional
+from sqlalchemy.orm import Session
+from . import models
 from .schemas import Blog
 from .types import JsonType, OkResponseType
 from .models import Base
-from .database import engine
+from .database import engine, sessionLocal
 
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = sessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.get("/")
@@ -44,5 +55,9 @@ def comments(id: int, limit: Optional[str] = None) -> OkResponseType:
 
 
 @app.post("/blog")
-def create_blog(blog: Blog) -> OkResponseType:
-    return {"data": blog}
+def create_blog(blog: Blog, db: Session = Depends(get_db)) -> OkResponseType:
+    new_blog = models.Blog(title=blog.title, body=blog.body)
+    db.add(new_blog)
+    db.commit()
+    db.refresh(new_blog)
+    return {"data": new_blog}
