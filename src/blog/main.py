@@ -1,45 +1,7 @@
 from fastapi import FastAPI
-from typing import TypedDict, Dict, Union, List, Optional
-from pydantic import BaseModel
-
-
-class Blog(BaseModel):
-    title: str
-    description: str
-    published_at: Optional[bool]
-
-
-_JsonPremitiveValueType = Union[str, int, bool, None]
-JsonKeyType = Union[str, int]
-_JsonWithoutChildJsonType = Dict[
-    JsonKeyType, Union[_JsonPremitiveValueType, List[_JsonPremitiveValueType]]
-]
-
-# JSON
-JsonType = Dict[
-    JsonKeyType,
-    Union[
-        _JsonPremitiveValueType,
-        List[_JsonPremitiveValueType],
-        _JsonWithoutChildJsonType,
-        List[_JsonWithoutChildJsonType],
-    ],
-]
-
-# JSONの値
-JsonValueType = Union[
-    _JsonPremitiveValueType,
-    List[_JsonPremitiveValueType],
-    JsonType,
-]
-
-
-# レスポンス型
-OkResponseType = TypedDict(
-    "ResponseType",
-    # `BaseModel`を受け付けられるようにする
-    {"data": Union[JsonValueType, BaseModel]},
-)
+from typing import Optional
+from .schemas import Blog
+from .types import JsonType, OkResponseType
 
 app = FastAPI()
 
