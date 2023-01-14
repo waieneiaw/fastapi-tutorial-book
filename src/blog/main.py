@@ -67,3 +67,18 @@ def show(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
         )
 
     return {"data": blog}
+
+
+@app.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
+    blog = db.query(models.Blog).filter(models.Blog.id == id)
+    if not blog:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Blog with the id {id} is not found",
+        )
+
+    blog.delete(synchronize_session=False)
+    db.commit()
+
+    return {"data": "Deletion completed"}
