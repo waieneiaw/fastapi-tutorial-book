@@ -29,7 +29,23 @@ JsonValueType = Union[
 
 # レスポンス型
 OkResponseType = TypedDict(
-    "ResponseType",
+    "OkResponseType",
     # `BaseModel`を受け付けられるようにする
     {"data": Union[JsonValueType, BaseModel]},
 )
+
+
+class OKResponse(TypedDict):
+    data: Union[JsonValueType, BaseModel]
+
+
+class ErrData(TypedDict):
+    status: int
+    detail: str
+
+
+class ErrResponse(TypedDict):
+    error: ErrData
+
+
+HTTPResponse = Union[OKResponse, ErrResponse]
