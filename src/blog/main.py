@@ -32,17 +32,17 @@ def about():
     return {"data": {"name": "about"}}
 
 
-@app.get("/blog/category")
+@app.get("/blog/category", tags=["blogs"])
 def category() -> JsonType:
     return {"data": ["all category"]}
 
 
-@app.get("/blog/{id}/comments")
+@app.get("/blog/{id}/comments", tags=["blogs"])
 def comments(id: int, limit: Optional[str] = None) -> HTTPResponse:
     return {"data": [id, limit, "comments"]}
 
 
-@app.post("/blog", status_code=status.HTTP_201_CREATED)
+@app.post("/blog", status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
     new_blog = models.Blog(title=blog.title, body=blog.body)
     db.add(new_blog)
@@ -52,14 +52,22 @@ def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
 
 
 @app.get(
-    "/blog", status_code=status.HTTP_200_OK, response_model=List[ShowBlog]
+    "/blog",
+    status_code=status.HTTP_200_OK,
+    response_model=List[ShowBlog],
+    tags=["blogs"],
 )
 def all_fetch(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
 
-@app.get("/blog/{id}", status_code=status.HTTP_200_OK, response_model=ShowBlog)
+@app.get(
+    "/blog/{id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ShowBlog,
+    tags=["blogs"],
+)
 def show(id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
 
@@ -72,7 +80,9 @@ def show(id: int, db: Session = Depends(get_db)):
     return blog
 
 
-@app.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete(
+    "/blog/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["blogs"]
+)
 def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog:
@@ -87,7 +97,7 @@ def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
     return {"data": "Deletion completed"}
 
 
-@app.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED)
+@app.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED, tags=["blogs"])
 def update(
     id: int, request: Blog, db: Session = Depends(get_db)
 ) -> HTTPResponse:
@@ -104,7 +114,7 @@ def update(
     return {"data": "Update completed"}
 
 
-@app.post("/user")
+@app.post("/user", tags=["users"])
 def create_user(request: User, db: Session = Depends(get_db)):
     hashed_password = Hash.bcrypt(request.password)
     new_user = models.User(
@@ -116,7 +126,7 @@ def create_user(request: User, db: Session = Depends(get_db)):
     return new_user
 
 
-@app.get("/user/{id}", response_model=ShowUser)
+@app.get("/user/{id}", response_model=ShowUser, tags=["users"])
 def get_user(id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
