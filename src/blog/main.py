@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, status, HTTPException
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from . import models
-from .schemas import Blog, ShowBlog
+from .schemas import Blog, ShowBlog, User
 from .types import JsonType, HTTPResponse
 from .models import Base
 from .database import engine, sessionLocal
@@ -101,3 +101,14 @@ def update(
     db.commit()
 
     return {"data": "Update completed"}
+
+
+@app.post("/user")
+def create_user(request: User, db: Session = Depends(get_db)):
+    new_user = models.User(
+        name=request.name, email=request.email, password=request.password
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return request
