@@ -25,9 +25,11 @@ def comments(id: int, limit: Optional[str] = None) -> HTTPResponse:
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_blog(
-    request: schemas.Blog, db: Session = Depends(get_db)
+    request: schemas.Blog,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(oauth2.get_current_user),
 ) -> HTTPResponse:
-    result = blog.create(db, request)
+    result = blog.create(db, request, current_user)
     return {"data": result}
 
 

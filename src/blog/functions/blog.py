@@ -9,8 +9,12 @@ def get_all(db: Session) -> List[models.Blog]:
     return blogs
 
 
-def create(db: Session, request: schemas.Blog) -> models.Blog:
-    new_blog = models.Blog(title=request.title, body=request.body, user_id=1)
+def create(
+    db: Session, request: schemas.Blog, current_user: models.User
+) -> models.Blog:
+    new_blog = models.Blog(
+        title=request.title, body=request.body, user_id=current_user.id
+    )
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
