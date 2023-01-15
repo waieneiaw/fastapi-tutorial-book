@@ -7,20 +7,23 @@ from ..types import JsonType, HTTPResponse
 from ..database import get_db
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/blog",
+    tags=["blogs"],
+)
 
 
-@router.get("/blog/category", tags=["blogs"])
+@router.get("/category")
 def category() -> JsonType:
     return {"data": ["all category"]}
 
 
-@router.get("/blog/{id}/comments", tags=["blogs"])
+@router.get("/{id}/comments")
 def comments(id: int, limit: Optional[str] = None) -> HTTPResponse:
     return {"data": [id, limit, "comments"]}
 
 
-@router.post("/blog", status_code=status.HTTP_201_CREATED, tags=["blogs"])
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
     new_blog = models.Blog(title=blog.title, body=blog.body, user_id=1)
     db.add(new_blog)
@@ -30,10 +33,9 @@ def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
 
 
 @router.get(
-    "/blog",
+    "/",
     status_code=status.HTTP_200_OK,
     response_model=List[ShowBlog],
-    tags=["blogs"],
 )
 def all_fetch(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
@@ -41,10 +43,9 @@ def all_fetch(db: Session = Depends(get_db)):
 
 
 @router.get(
-    "/blog/{id}",
+    "/{id}",
     status_code=status.HTTP_200_OK,
     response_model=ShowBlog,
-    tags=["blogs"],
 )
 def show(id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
@@ -58,9 +59,7 @@ def show(id: int, db: Session = Depends(get_db)):
     return blog
 
 
-@router.delete(
-    "/blog/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["blogs"]
-)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog:
@@ -75,7 +74,7 @@ def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
     return {"data": "Deletion completed"}
 
 
-@router.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED, tags=["blogs"])
+@router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
 def update(
     id: int, request: Blog, db: Session = Depends(get_db)
 ) -> HTTPResponse:
