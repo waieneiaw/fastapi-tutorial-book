@@ -6,6 +6,7 @@ from .schemas import Blog, ShowBlog, User
 from .types import JsonType, HTTPResponse
 from .models import Base
 from .database import engine, sessionLocal
+from .hashing import Hash
 
 app = FastAPI()
 
@@ -105,10 +106,11 @@ def update(
 
 @app.post("/user")
 def create_user(request: User, db: Session = Depends(get_db)):
+    hashed_password = Hash.bcrypt(request.password)
     new_user = models.User(
-        name=request.name, email=request.email, password=request.password
+        name=request.name, email=request.email, password=hashed_password
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return request
+    return new_user
