@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from .. import models
-from ..schemas import Blog, ShowBlog
+from .. import models, schemas, oauth2
 from ..types import JsonType, HTTPResponse
 from ..database import get_db
 from ..functions import blog
@@ -25,7 +24,9 @@ def comments(id: int, limit: Optional[str] = None) -> HTTPResponse:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_blog(request: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
+def create_blog(
+    request: schemas.Blog, db: Session = Depends(get_db)
+) -> HTTPResponse:
     result = blog.create(db, request)
     return {"data": result}
 
@@ -33,9 +34,12 @@ def create_blog(request: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
 @router.get(
     "/",
     status_code=status.HTTP_200_OK,
-    response_model=List[ShowBlog],
+    response_model=List[schemas.ShowBlog],
 )
-def all_fetch(db: Session = Depends(get_db)):
+def all_fetch(
+    db: Session = Depends(get_db),
+    _: schemas.User = Depends(oauth2.get_current_user),
+):
     blogs = blog.get_all(db)
     return blogs
 
@@ -43,7 +47,7 @@ def all_fetch(db: Session = Depends(get_db)):
 @router.get(
     "/{id}",
     status_code=status.HTTP_200_OK,
-    response_model=ShowBlog,
+    response_model=schemas.ShowBlog,
 )
 def show(id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
@@ -64,6 +68,6 @@ def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
 def update(
-    id: int, request: Blog, db: Session = Depends(get_db)
+    id: int, request: schemas.Blog, db: Session = Depends(get_db)
 ) -> HTTPResponse:
     return {"data": blog.update(db, id, request)}
