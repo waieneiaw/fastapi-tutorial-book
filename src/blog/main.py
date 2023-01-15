@@ -44,7 +44,7 @@ def comments(id: int, limit: Optional[str] = None) -> HTTPResponse:
 
 @app.post("/blog", status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
-    new_blog = models.Blog(title=blog.title, body=blog.body)
+    new_blog = models.Blog(title=blog.title, body=blog.body, user_id=1)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
