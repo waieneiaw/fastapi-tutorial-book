@@ -5,6 +5,7 @@ from .. import models
 from ..schemas import Blog, ShowBlog
 from ..types import JsonType, HTTPResponse
 from ..database import get_db
+from ..functions import blog
 
 
 router = APIRouter(
@@ -24,12 +25,9 @@ def comments(id: int, limit: Optional[str] = None) -> HTTPResponse:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
-    new_blog = models.Blog(title=blog.title, body=blog.body, user_id=1)
-    db.add(new_blog)
-    db.commit()
-    db.refresh(new_blog)
-    return {"data": new_blog}
+def create_blog(request: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
+    result = blog.create(db, request)
+    return {"data": result}
 
 
 @router.get(
@@ -38,7 +36,7 @@ def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
     response_model=List[ShowBlog],
 )
 def all_fetch(db: Session = Depends(get_db)):
-    blogs = db.query(models.Blog).all()
+    blogs = blog.get_all(db)
     return blogs
 
 
@@ -61,31 +59,11 @@ def show(id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
-    blog = db.query(models.Blog).filter(models.Blog.id == id)
-    if not blog:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Blog with the id {id} is not found",
-        )
-
-    blog.delete(synchronize_session=False)
-    db.commit()
-
-    return {"data": "Deletion completed"}
+    return {"data": blog.delete(db, id)}
 
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
 def update(
     id: int, request: Blog, db: Session = Depends(get_db)
 ) -> HTTPResponse:
-    blog = db.query(models.Blog).filter(models.Blog.id == id)
-    if not blog:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Blog with the id {id} is not found",
-        )
-
-    blog.update(request.dict())
-    db.commit()
-
-    return {"data": "Update completed"}
+    return {"data": blog.update(db, id, request)}
