@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, status, HTTPException
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.orm import Session
 from . import models
-from .schemas import Blog
+from .schemas import Blog, ShowBlog
 from .types import JsonType, HTTPResponse
 from .models import Base
 from .database import engine, sessionLocal
@@ -50,14 +50,16 @@ def create_blog(blog: Blog, db: Session = Depends(get_db)) -> HTTPResponse:
     return {"data": new_blog}
 
 
-@app.get("/blog", status_code=status.HTTP_200_OK)
-def all_fetch(db: Session = Depends(get_db)) -> HTTPResponse:
+@app.get(
+    "/blog", status_code=status.HTTP_200_OK, response_model=List[ShowBlog]
+)
+def all_fetch(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
-    return {"data": blogs}
+    return blogs
 
 
-@app.get("/blog/{id}", status_code=status.HTTP_200_OK)
-def show(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
+@app.get("/blog/{id}", status_code=status.HTTP_200_OK, response_model=ShowBlog)
+def show(id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
 
     if not blog:
@@ -66,7 +68,7 @@ def show(id: int, db: Session = Depends(get_db)) -> HTTPResponse:
             detail=f"Blog with the id {id} is not available",
         )
 
-    return {"data": blog}
+    return blog
 
 
 @app.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT)
